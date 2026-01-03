@@ -19,7 +19,7 @@ public interface MaterialRepository extends JpaRepository<Material, Long> {
     Optional<Material> findByName(String name);
     List<Material> findByNameContainingIgnoreCase(String name);
     List<Material> findByCreatedAtAfter(LocalDateTime startDate);
-    List<Material> findCreatedAtBetween(LocalDateTime start, LocalDate end);
+    List<Material> findByCreatedAtBetween(LocalDateTime start, LocalDate end);
     List<Material> findByNameIn(List<String> names);
 
 

@@ -8,7 +8,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -27,6 +29,9 @@ public class Product {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "sku", length = 50)
+    private String sku;
+
     @Column(name = "weight", nullable = false, precision = 8, scale = 3)
     private BigDecimal weight;
 
@@ -41,21 +46,18 @@ public class Product {
 
     @CreationTimestamp
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
-//    @ManyToMany(mappedBy = "product")
-//    private Set<OrderItem> orderItems = new HashSet<>();
+    @ManyToMany(mappedBy = "product")
+    private Set<OrderItem> orderItems = new HashSet<>();
 
-    // Константы для типов изделий:
-    public static final String TYPE_RING = "КОЛЬЦО";
-    public static final String TYPE_EARRINGS = "СЕРЬГИ";
-    public static final String TYPE_CHAIN = "ЦЕПОЧКА";
-    public static final String TYPE_NECKLACE = "КОЛЬЕ";
-    public static final String TYPE_BRACELET = "БРАСЛЕТ";
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProductMaterial> productMaterials = new HashSet<>();
+
 
     public boolean isAvailable(){
         return inStock > 0;

@@ -16,8 +16,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     List<OrderItem> findByTotalPriceGreaterThan(BigDecimal orderPrice);
 
     List<OrderItem> findByOrderId(Long orderId);
-    List<OrderItem> findByProductIf(Long productId);
-    List<OrderItem> findOrderIdAndProductId(Long orderId, Long productId);
+    List<OrderItem> findByProductID(Long productId);
+    List<OrderItem> findByOrderIdAndProductId(Long orderId, Long productId);
 
     @Query("""
             SELECT SUM(oi.quantity) FROM OrderItem oi

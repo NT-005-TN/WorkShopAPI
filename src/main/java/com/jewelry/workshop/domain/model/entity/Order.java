@@ -8,7 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "orders")
@@ -21,9 +21,8 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    @Column(name = "order_number", nullable = false, unique = true)
+    private Long orderNumber;
 
     @Column(name = "status", length = 20)
     private String status = STATUS_PENDING;
@@ -41,15 +40,22 @@ public class Order {
     private String notes;
 
     @Column(name = "order_datetime")
-    private LocalDateTime orderDatetime;
+    private Instant orderDatetime;
+
+    @Column(name = "completed_at")
+    private Instant completedAt;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
 
     // Константы для статусов заказа
     public static final String STATUS_PENDING = "PENDING";
@@ -59,7 +65,7 @@ public class Order {
     public static final String STATUS_DELIVERED = "DELIVERED";
 
     public Order() {
-        this.orderDatetime = LocalDateTime.now();
+        this.orderDatetime = Instant.now();
     }
 
     public void calculateTotals(){
@@ -90,7 +96,7 @@ public class Order {
         this.status = newStatus;
 
         if(STATUS_COMPLETED.equals(newStatus) || STATUS_DELIVERED.equals(newStatus))
-            this.orderDatetime = LocalDateTime.now();
+            this.orderDatetime = Instant.now();
     }
 
     public boolean canBeCancelled() {

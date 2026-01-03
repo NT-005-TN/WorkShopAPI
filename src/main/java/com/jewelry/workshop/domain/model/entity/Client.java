@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,9 +30,6 @@ public class Client {
     @Column(name = "patronymic", nullable = true, length = 50)
     private String patronymic;
 
-    @Column(name = "email", nullable = false, length = 100, unique = true)
-    private String email;
-
     @Column(name = "phone", length = 20)
     private String phone;
 
@@ -40,12 +37,15 @@ public class Client {
     private Boolean isPermanent = false;
 
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private Set<Order> orders = new HashSet<>();

@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,19 +30,15 @@ public class Material {
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
+
+    @CreationTimestamp
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 
     @ManyToMany(mappedBy = "materials")
     private Set<Product> products = new HashSet<>();
 
-    // Константы для часто используемых материалов
-    public static final String GOLD_585 = "Золото 585";
-    public static final String GOLD_750 = "Золото 750";
-    public static final String SILVER_925 = "Серебро 925";
-    public static final String PLATINUM_950 = "Платина 950";
-    public static final String DIAMOND = "Бриллиант";
-    public static final String EMERALD = "Изумруд";
-    public static final String SAPPHIRE = "Сапфир";
-    public static final String RUBY = "Рубин";
-    public static final String PEARL = "Жемчуг";
+    @OneToMany(mappedBy = "material", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProductMaterial> productMaterial = new HashSet<>();
 }

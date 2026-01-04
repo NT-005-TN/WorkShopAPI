@@ -6,22 +6,25 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.util.Lazy;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "orders")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"client", "orderItems"})
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_number", nullable = false, unique = true)
+    @Column(name = "order_number", nullable = false, unique = true, insertable = false)
     private Long orderNumber;
 
     @Column(name = "status", length = 20)
@@ -53,6 +56,9 @@ public class Order {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private Set<OrderItem> orderItems = new HashSet<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
@@ -72,10 +78,6 @@ public class Order {
         if (client == null)
             throw new IllegalStateException("Заказ должен иметь клиента");
 
-        if (totalAmount.compareTo(BigDecimal.ZERO) > 0){
-            return;
-        }
-
         if(client.isPermanentClient())
             discountAmount = totalAmount.multiply(new BigDecimal("0.10"));
         else
@@ -84,7 +86,7 @@ public class Order {
         finalAmount = totalAmount.subtract(discountAmount);
 
         if(finalAmount.compareTo(BigDecimal.ZERO) < 0)
-            totalAmount = BigDecimal.ZERO;
+            finalAmount = BigDecimal.ZERO;
     }
 
     public void updateStatus(String newStatus){
@@ -130,5 +132,25 @@ public class Order {
                 client != null ? client.getFullName() : "Неизвестный клиент",
                 status, finalAmount.doubleValue()
         );
+    }
+
+    public void addOrderItem(OrderItem item){
+        orderItems.add(item);
+        item.setOrder(this);
+        recalculateTotal();
+    }
+
+    public void removeOrderItem(OrderItem item){
+        orderItems.remove(item);
+        item.setOrder(null);
+        recalculateTotal();
+    }
+
+    public void recalculateTotal(){
+        totalAmount = BigDecimal.ZERO;
+        for(OrderItem item: orderItems){
+            totalAmount = totalAmount.add(item.getTotalPrice());
+        }
+        calculateTotals();
     }
 }

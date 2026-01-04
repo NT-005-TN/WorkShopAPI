@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
@@ -36,6 +37,7 @@ public class Client {
     @Column(name = "is_permanent")
     private Boolean isPermanent = false;
 
+    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
@@ -57,5 +59,4 @@ public class Client {
     public boolean isPermanentClient(){
         return Boolean.TRUE.equals(isPermanent);
     }
-
 }

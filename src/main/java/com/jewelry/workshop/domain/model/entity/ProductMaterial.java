@@ -1,7 +1,6 @@
 package com.jewelry.workshop.domain.model.entity;
 
 import jakarta.persistence.*;
-import jdk.jfr.Timespan;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "materialProducts")
+@Table(name = "product_materials")
 @Getter
 @Setter
 @ToString()

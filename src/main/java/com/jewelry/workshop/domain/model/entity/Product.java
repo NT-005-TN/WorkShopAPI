@@ -16,7 +16,7 @@ import java.util.Set;
 @Table(name = "products")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"orderItems", "productMaterials"})
 public class Product {
 
     @Id
@@ -41,6 +41,9 @@ public class Product {
     @Column(name = "type", length = 20, nullable = false)
     private String type;
 
+    @Column(name = "is_available")
+    private Boolean isAvailable;
+
     @Column(name = "in_stock")
     private Integer inStock = 0;
 
@@ -52,16 +55,11 @@ public class Product {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    @ManyToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product")
     private Set<OrderItem> orderItems = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductMaterial> productMaterials = new HashSet<>();
-
-
-    public boolean isAvailable(){
-        return inStock > 0;
-    }
 
     public void decreaseStock(Integer quantity){
         if(quantity == null || quantity <= 0)
@@ -83,4 +81,22 @@ public class Product {
             );
         this.inStock += quantity;
     }
+
+    @Transient
+    public boolean isAvailableForSale(){
+        return Boolean.TRUE.equals(isAvailable) && inStock > 0;
+    }
+
+    public void updateAvailability(){
+        this.isAvailable = inStock > 0;
+    }
+
+    public String getProductInfo(){
+        return String.format("%s (SKU: %s) - %,.2f руб., В наличии: %d",
+                name,
+                sku != null ? sku : "N/A",
+                price.doubleValue(),
+                inStock);
+    }
+
 }

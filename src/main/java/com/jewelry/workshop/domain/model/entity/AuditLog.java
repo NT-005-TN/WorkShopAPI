@@ -23,7 +23,7 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "action", length = 10, nullable = false)
+    @Column(name = "action", length = 20, nullable = false)
     private String action;
 
     @Column(name = "table_name", length = 50, nullable = false)
@@ -53,4 +53,17 @@ public class AuditLog {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+
+    public String getLog(){
+        return String.format(
+                "user: %s, action: %s, time: %s, table: %s, record_id: %d",
+                user != null ? user.getUsername() : "unknown",
+                action,
+                createdAt,
+                tableName,
+                recordId);
+    }
+
 }
+

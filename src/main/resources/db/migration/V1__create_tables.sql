@@ -119,7 +119,7 @@ COMMENT ON TABLE order_items IS 'Позиции в заказе';
 CREATE TABLE IF NOT EXISTS audit_log (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id),
-    action VARCHAR(10) NOT NULL CHECK (action IN ('CREATE', 'UPDATE', 'DELETE')),
+    action VARCHAR(20) NOT NULL CHECK (action IN ('CREATE', 'UPDATE', 'DELETE')),
     table_name VARCHAR(50) NOT NULL,
     record_id INTEGER NOT NULL,
     old_values JSON,
@@ -130,3 +130,15 @@ CREATE TABLE IF NOT EXISTS audit_log (
     );
 
 COMMENT ON TABLE audit_log IS 'Аудит и логи';
+
+-- Таблица сотрудников --
+CREATE TABLE IF NOT EXISTS employees (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    position VARCHAR(50),                    -- должность
+    department VARCHAR(50),                  -- отдел
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+COMMENT ON TABLE employees IS 'Сотрудники ювелирной мастерской';

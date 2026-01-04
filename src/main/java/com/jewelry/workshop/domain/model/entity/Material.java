@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -32,13 +33,20 @@ public class Material {
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    @ManyToMany(mappedBy = "materials")
-    private Set<Product> products = new HashSet<>();
-
     @OneToMany(mappedBy = "material", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ProductMaterial> productMaterial = new HashSet<>();
+    private Set<ProductMaterial> productMaterials = new HashSet<>();
+
+    public void addProductMaterial(ProductMaterial pm){
+        productMaterials.add(pm);
+        pm.setMaterial(this);
+    }
+
+    public void removeProductMaterial(ProductMaterial pm){
+        productMaterials.remove(pm);
+        pm.setMaterial(null);
+    }
 }

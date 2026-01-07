@@ -22,9 +22,9 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     List<AuditLog> findByActionIn(List<String> actions);
 
     List<AuditLog> findByTableName(String tableName);
-    List<AuditLog> findByTableNameAcdRecordId(String tableName, Long recordId);
+    List<AuditLog> findByTableNameAndRecordId(String tableName, Long recordId);
 
-    List<AuditLog> findByCratedAtBetween(Instant start, Instant end);
+    List<AuditLog> findByCreatedAtBetween(Instant start, Instant end);
     List<AuditLog> findByCreatedAtAfter(Instant date);
     List<AuditLog> findByCreatedAtBefore(Instant date);
 
@@ -65,5 +65,63 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     );
 
     @Query("""
-        SELECT a.user.id, u.username,
+        SELECT a.user.id, u.username, COUNT(a) as totalActions
+        FROM AuditLog a
+        JOIN a.user u
+        WHERE a.createdAt BETWEEN :startDate AND :endDate
+        GROUP BY a.user.id, u.username
+                ORDER BY totalActions DESC
+        """)
+    List<Object[]> findMostActiveUsersInPeriod(
+            @Param("startDate") Instant startDate,
+            @Param("endDate") Instant endDate
+    );
+
+    @Query("""
+        SELECT a FROM AuditLog a
+        WHERE a.tableName = :tableName
+        AND a.recordId = :recordId
+                ORDER BY a.createdAt DESC
+        """)
+    List<AuditLog> findRecordHistory(
+            @Param("tableName") String tableName,
+            @Param("recordId") Long recordId
+    );
+
+    @Query("""
+            SELECT a.ipAddress, COUNT(a) as requestCount
+            FROM AuditLog a
+            WHERE a.ipAddress IS NOT NULL
+            AND a.createdAt >= :startDate
+            GROUP BY a.ipAddress
+            HAVING COUNT(a) >= :threshold
+            ORDER BY requestCount DESC
+            """)
+    List<Object[]> findSuspiciousIpAddresses(
+            @Param("startDate") Instant startDate,
+            @Param("threshold") Long threshold
+    );
+
+    @Query("""
+        SELECT a FROM AuditLog a 
+        WHERE (:userId IS NULL OR a.user.id = :userId)
+        AND (:action IS NULL OR a.action = :action)
+        AND (:tableName IS NULL OR a.tableName = :tableName)
+        AND (:recordId IS NULL OR a.recordId = :recordId)
+        AND (:startDate IS NULL OR a.createdAt >= :startDate)
+        AND (:endDate IS NULL OR a.createdAt <= :endDate)
+        """)
+    Page<AuditLog> findByCriteria(
+            @Param("userId") Long userId,
+            @Param("action") String action,
+            @Param("tableName") String tableName,
+            @Param("recordId") Long recordId,
+            @Param("startDate") Instant startDate,
+            @Param("endDate") Instant endDate,
+            Pageable pageable
+    );
+
+    //Удаление старых логов
+    @Query("DELETE FROM AuditLog a WHERE a.createdAt < :date")
+    int deleteOldLogs(@Param("date") Instant date);
 }

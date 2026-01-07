@@ -17,5 +17,4 @@ public class OrderItemCreateDTO {
     @Min(value = 1, message = "Количество должно быть не менее 1")
     @Schema(description = "Количество товара", example = "2", required = true)
     private Integer quantity;
-
 }

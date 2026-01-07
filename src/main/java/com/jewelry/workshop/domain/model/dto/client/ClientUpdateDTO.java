@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-@Schema(description = "DTO для обновления данных клиента")
+@Schema(description = "DTO для обновления клиента")
 public class ClientUpdateDTO {
 
     @Size(min = 2, max = 50, message = "Имя должно быть от 2 до 50 символов")

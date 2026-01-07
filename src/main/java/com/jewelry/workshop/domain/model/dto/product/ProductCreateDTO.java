@@ -7,7 +7,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-@Schema(description = "DTO для создания нового изделия")
+@Schema(description = "DTO для создания изделия")
 public class ProductCreateDTO {
 
     @NotBlank(message = "Название изделия обязательно")
@@ -29,7 +29,10 @@ public class ProductCreateDTO {
     private BigDecimal price;
 
     @NotBlank(message = "Тип изделия обязателен")
-    @Schema(description = "Тип изделия", example = "КОЛЬЦО", required = true)
+    @Pattern(regexp = "КОЛЬЦО|СЕРЬГИ|БРАСЛЕТ|КОЛЬЕ|ПОДВЕСКА|ЧАСЫ|БРОШЬ|ЗАПОНКИ",
+            message = "Недопустимый тип изделия. Допустимые значения: КОЛЬЦО, СЕРЬГИ, БРАСЛЕТ, КОЛЬЕ, ПОДВЕСКА, ЧАСЫ, БРОШЬ, ЗАПОНКИ")
+    @Schema(description = "Тип изделия", example = "КОЛЬЦО", required = true,
+            allowableValues = {"КОЛЬЦО", "СЕРЬГИ", "БРАСЛЕТ", "КОЛЬЕ", "ПОДВЕСКА", "ЧАСЫ", "БРОШЬ", "ЗАПОНКИ"})
     private String type;
 
     @NotNull(message = "Количество на складе обязательно")
@@ -37,4 +40,6 @@ public class ProductCreateDTO {
     @Schema(description = "Количество на складе", example = "10", required = true)
     private Integer inStock;
 
+    @Schema(description = "Минимальный порог остатка", example = "5")
+    private Integer minStockThreshold = 5;
 }

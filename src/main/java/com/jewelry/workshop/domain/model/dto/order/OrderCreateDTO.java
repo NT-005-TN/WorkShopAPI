@@ -10,11 +10,11 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@Schema(description = "DTO для создания нового заказа")
+@Schema(description = "DTO для создания заказа")
 public class OrderCreateDTO {
 
     @NotNull(message = "ID клиента обязателен")
-    @Schema(description = "ID клиента, который делает заказ", example = "1", required = true)
+    @Schema(description = "ID клиента", example = "1", required = true)
     private Long clientId;
 
     @NotEmpty(message = "Заказ должен содержать хотя бы один товар")

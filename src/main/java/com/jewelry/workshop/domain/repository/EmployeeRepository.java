@@ -43,10 +43,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     Page<Employee> findByPosition(String position, Pageable pageable);
 
-    boolean existsByYserId(Long userId);
+    boolean existsByUserId(Long userId);
 
     //Запросы с Query - выборка
-    @Query("SELECT e.department, COUNT(e) FROM Employee e GROUP BY e.deaprtment")
+    @Query("SELECT e.department, COUNT(e) FROM Employee e GROUP BY e.department")
     List<Object[]> countEmployeesByDepartment();
 
     @Query("SELECT e.position, COUNT(e) FROM Employee e GROUP BY e.position")
@@ -62,7 +62,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @Query("""
         SELECT e FROM Employee e
-            WHERE e.department = : department
+            WHERE e.department = :department
             AND e.id IN (
                 SELECT a.user.id FROM AuditLog a
                     WHERE a.action = 'CREATE'

@@ -563,3 +563,194 @@ audit_log (Лог изменений)
 ---
 
 Эта структура дает полное представление о том, что должно быть реализовано в API. Каждый пункт можно разбить на подзадачи и реализовывать постепенно, начиная с самого важного функционала.
+
+src/main/java/com/jewelry/workshop/
+│
+├── JewelryWorkshopApplication.java            // Точка входа
+│
+├── config/                                    // Infrastructure Layer: конфигурации
+│   ├── SecurityConfig.java                    // Настройка Spring Security
+│   ├── JwtConfig.java                         // Конфигурация JWT
+│   ├── WebMvcConfig.java                      // Настройка DTO, мапперов, глобальных настроек
+│   ├── CacheConfig.java                       // Redis кэширование
+│   ├── KafkaProducerConfig.java               // Kafka Producer
+│   └── KafkaConsumerConfig.java               // Kafka Consumer
+│
+├── domain/
+│   │
+│   ├── model/
+│   │   ├── entity/                            // Persistence Layer: JPA сущности
+│   │   │   ├── User.java
+│   │   │   ├── Client.java
+│   │   │   ├── Employee.java
+│   │   │   ├── Product.java
+│   │   │   ├── Material.java
+│   │   │   ├── Order.java
+│   │   │   ├── OrderItem.java
+│   │   │   ├── ProductMaterial.java
+│   │   │   └── AuditLog.java
+│   │   │
+│   │   └── dto/                               // Presentation Layer: DTO
+│   │       ├── auth/                          // DTO аутентификации и регистрации
+│   │       │   ├── RegisterRequestDTO.java
+│   │       │   ├── LoginRequestDTO.java
+│   │       │   ├── AuthResponseDTO.java
+│   │       │   ├── AuthUserDTO.java
+│   │       │   ├── RefreshTokenRequestDTO.java
+│   │       │   ├── LogoutRequestDTO.java
+│   │       │   ├── EmailVerificationDTO.java
+│   │       │   ├── PasswordResetRequestDTO.java
+│   │       │   └── PasswordResetConfirmDTO.java
+│   │       │
+│   │       ├── client/                        // DTO клиентов
+│   │       │   ├── ClientCreateDTO.java
+│   │       │   ├── ClientCreateWithPasswordDTO.java
+│   │       │   ├── ClientUpdateDTO.java
+│   │       │   ├── ClientStatusUpdateDTO.java
+│   │       │   ├── ClientResponseDTO.java
+│   │       │   ├── ClientProfileDTO.java
+│   │       │   └── ClientSearchDTO.java
+│   │       │
+│   │       ├── employee/                      // DTO сотрудников
+│   │       │   ├── EmployeeCreateDTO.java
+│   │       │   ├── EmployeeUpdateDTO.java
+│   │       │   ├── EmployeeResponseDTO.java
+│   │       │   └── EmployeeSearchDTO.java
+│   │       │
+│   │       ├── product/                       // DTO изделий
+│   │       │   ├── ProductCreateDTO.java
+│   │       │   ├── ProductUpdateDTO.java
+│   │       │   ├── ProductResponseDTO.java
+│   │       │   ├── ProductSearchDTO.java
+│   │       │   ├── ProductStockUpdateDTO.java
+│   │       │   ├── ProductAvailabilityDTO.java
+│   │       │   └── LowStockRequestDTO.java
+│   │       │
+│   │       ├── material/                      // DTO материалов
+│   │       │   ├── MaterialCreateDTO.java
+│   │       │   ├── MaterialUpdateDTO.java
+│   │       │   ├── MaterialResponseDTO.java
+│   │       │   └── MaterialSearchDTO.java
+│   │       │
+│   │       ├── order/                         // DTO заказов
+│   │       │   ├── OrderCreateDTO.java
+│   │       │   ├── OrderUpdateDTO.java
+│   │       │   ├── OrderStatusUpdateDTO.java
+│   │       │   ├── OrderCancelRequestDTO.java
+│   │       │   ├── OrderDiscountDTO.java
+│   │       │   ├── OrderResponseDTO.java
+│   │       │   ├── OrderSearchDTO.java
+│   │       │   └── OrderFilterDTO.java
+│   │       │
+│   │       ├── orderitem/                     // DTO позиций заказа
+│   │       │   ├── OrderItemCreateDTO.java
+│   │       │   ├── OrderItemUpdateDTO.java
+│   │       │   └── OrderItemResponseDTO.java
+│   │       │
+│   │       ├── user/                          // DTO пользователей
+│   │       │   ├── UserCreateDTO.java
+│   │       │   ├── UserUpdateDTO.java
+│   │       │   ├── UserResponseDTO.java
+│   │       │   └── UserSearchDTO.java
+│   │       │
+│   │       └── report/                        // DTO отчетов
+│   │           ├── SalesReportDTO.java
+│   │           └── ClientReportDTO.java
+│   │
+│   ├── repository/                            // Persistence Layer
+│   │   ├── UserRepository.java
+│   │   ├── ClientRepository.java
+│   │   ├── EmployeeRepository.java
+│   │   ├── ProductRepository.java
+│   │   ├── MaterialRepository.java
+│   │   ├── OrderRepository.java
+│   │   ├── OrderItemRepository.java
+│   │   ├── ProductMaterialRepository.java
+│   │   └── AuditLogRepository.java
+│   │
+│   └── service/                               // Business Layer
+│       ├── impl/                              // Реализации сервисов
+│       │   ├── AuthServiceImpl.java           // Регистрация, логин, JWT
+│       │   ├── UserServiceImpl.java           // CRUD пользователей, управление
+│       │   ├── ClientServiceImpl.java         // Управление клиентами, статусы
+│       │   ├── EmployeeServiceImpl.java       // Управление сотрудниками
+│       │   ├── ProductServiceImpl.java        // Управление изделиями + склад
+│       │   ├── MaterialServiceImpl.java       // Управление материалами
+│       │   ├── OrderServiceImpl.java          // Создание/изменение заказов
+│       │   ├── InventoryService.java          // Проверка остатков, low-stock
+│       │   ├── ReportService.java             // Генерация отчетов
+│       │   └── AuditLogService.java           // Логирование действий
+│       │
+│       ├── interfaces/                        // Интерфейсы сервисов
+│       │   ├── AuthService.java
+│       │   ├── UserService.java
+│       │   ├── ClientService.java
+│       │   ├── EmployeeService.java
+│       │   ├── ProductService.java
+│       │   ├── MaterialService.java
+│       │   ├── OrderService.java
+│       │   ├── InventoryService.java
+│       │   ├── ReportService.java
+│       │   └── AuditLogService.java
+│       │
+│       └── mapper/                            // Mappers (Entity ↔ DTO)
+│           ├── UserMapper.java
+│           ├── ClientMapper.java
+│           ├── EmployeeMapper.java
+│           ├── ProductMapper.java
+│           ├── MaterialMapper.java
+│           ├── OrderMapper.java
+│           └── OrderItemMapper.java
+│
+├── presentation/                              // Presentation Layer
+│   ├── controller/                            // REST-контроллеры
+│   │   ├── AuthController.java                // /auth/*
+│   │   ├── UserController.java                // /users/*
+│   │   ├── ClientController.java              // /clients/*
+│   │   ├── EmployeeController.java            // /employees/*
+│   │   ├── ProductController.java             // /products/*
+│   │   ├── MaterialController.java            // /materials/*
+│   │   ├── OrderController.java               // /orders/*
+│   │   └── ReportController.java              // /reports/*
+│   │
+│   └── exception/                             // Глобальные обработчики ошибок
+│       ├── GlobalExceptionHandler.java        // @ControllerAdvice
+│       ├── ApiException.java                  // Общая бизнес-ошибка
+│       └── error/                             // DTO ошибок
+│           └── ErrorResponseDTO.java
+│
+├── security/                                  // Security Layer
+│   ├── jwt/                                   // JWT обработка
+│   │   ├── JwtTokenProvider.java              // Генерация/валидация токенов
+│   │   ├── JwtAuthenticationFilter.java       // Фильтр для Spring Security
+│   │   └── TokenRefreshService.java           // Обновление refresh токена
+│   │
+│   └── auth/                                  // Авторизация и права
+│       ├── UserDetailsServiceImpl.java        // Загрузка пользователя по email
+│       ├── CustomAccessDeniedHandler.java     // Обработка 403
+│       ├── CustomAuthenticationEntryPoint.java// Обработка 401
+│       └── Role.java                          // ENUM ролей (дублируется, можно вынести)
+│
+├── infrastructure/                            // Infrastructure Layer
+│   ├── email/                                 // Email уведомления
+│   │   ├── EmailService.java
+│   │   └── EmailTemplate.java
+│   │
+│   ├── kafka/                                 // Kafka producers/consumers
+│   │   ├── producer/
+│   │   │   ├── OrderEventProducer.java
+│   │   │   └── NotificationEventProducer.java
+│   │   │
+│   │   └── consumer/
+│   │       ├── EmailNotificationConsumer.java
+│   │       └── InventoryUpdateConsumer.java
+│   │
+│   └── cache/                                 // Redis кэш
+│       ├── ProductCacheService.java
+│       └── UserSessionCacheService.java
+│
+└── util/                                      // Вспомогательные утилиты
+    ├── PasswordUtil.java                      // Хеширование паролей
+    ├── ValidationUtil.java                    // Кастомная валидация
+    ├── AuditLogUtil.java                      // Помощник для логирования
+    └── Constants.java                         // Общие константы (роли, статусы и т.д.)

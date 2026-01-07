@@ -1,6 +1,7 @@
 package com.jewelry.workshop.domain.model.dto.product;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "DTO для ответа с информацией об изделии")
 public class ProductResponseDTO {
 
@@ -19,6 +21,9 @@ public class ProductResponseDTO {
 
     @Schema(description = "Описание изделия", example = "Элегантное кольцо из желтого золота")
     private String description;
+
+    @Schema(description = "Артикул (SKU)", example = "RING-GD-001")
+    private String sku;
 
     @Schema(description = "Вес изделия в граммах", example = "5.250")
     private BigDecimal weight;

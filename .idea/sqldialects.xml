@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
-    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V1__create_tables.sql" dialect="GenericSQL" />
-    <file url="PROJECT" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V1__create_tables.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V2__insert_test_data.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V3__indexes.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V4__triggers.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V5__reset_type_audit_log_id.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V6__fix_audit_log_record_id_type.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V7__change_user_id_to_bigint_in_audit_log.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/db/migration/V8__align_timestamps_and_data_types_with_entities.sql" dialect="PostgreSQL" />
   </component>
 </project>

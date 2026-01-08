@@ -1,0 +1,3 @@
+-- Изменяем тип id с INTEGER на BIGINT
+ALTER TABLE audit_log
+ALTER COLUMN id TYPE BIGINT USING id::BIGINT;

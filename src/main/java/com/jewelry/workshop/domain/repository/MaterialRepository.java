@@ -95,14 +95,15 @@ public interface MaterialRepository extends JpaRepository<Material, Long> {
     List<Material> searchMaterials(@Param("keyword") String keyword);
 
     @Query("""
-            SELECT m FROM Material m 
-            WHERE m.createdAt >= :startDate 
-            AND (m.name LIKE %:searchTerm% OR m.description LIKE %:searchTerm%)
-            ORDER BY m.createdAt DESC
-            """)
+        SELECT m FROM Material m 
+        WHERE m.createdAt >= :startDate 
+        AND (m.name LIKE CONCAT('%', :searchTerm, '%') 
+             OR m.description LIKE CONCAT('%', :searchTerm, '%'))
+        ORDER BY m.createdAt DESC
+        """)
     Page<Material> findRecentMaterialsWithSearch(
             @Param("startDate") Instant startDate,
-            @Param("searchTerm") String searchTerm,  // Исправлено: endDate → searchTerm
+            @Param("searchTerm") String searchTerm,
             Pageable pageable
     );
 

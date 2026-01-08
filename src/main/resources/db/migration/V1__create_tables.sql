@@ -80,6 +80,8 @@ CREATE TABLE IF NOT EXISTS product_materials (
 
 COMMENT ON TABLE product_materials IS 'Связь изделий с материалами';
 
+CREATE SEQUENCE IF NOT EXISTS order_number_seq START 1000000;
+
 -- Таблица заказов (аналог Order из MySQL)
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
@@ -96,8 +98,6 @@ CREATE TABLE IF NOT EXISTS orders (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CHECK (final_amount = total_amount - discount_amount)
 );
-
-CREATE SEQUENCE IF NOT EXISTS order_number_seq START 1000000;
 
 COMMENT ON TABLE orders IS 'Заказы клиентов';
 

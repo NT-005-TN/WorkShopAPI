@@ -2,9 +2,12 @@ package com.jewelry.workshop.domain.model.dto.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder(builderMethodName = "builder", access = AccessLevel.PUBLIC)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "DTO для ответа аутентификации")
 public class AuthResponseDTO {

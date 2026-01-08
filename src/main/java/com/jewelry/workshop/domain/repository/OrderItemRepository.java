@@ -24,7 +24,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     List<OrderItem> findByOrderIdIn(List<Long> OrderIds);
     List<OrderItem> findByProductIdIn(List<Long> productIds);
 
-    List<OrderItem> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);
+    List<OrderItem> findByUnitPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);
     List<OrderItem> findByTotalPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);
 
     List<OrderItem> findByCreatedAtBetween(Instant startDate, Instant endDate);

@@ -19,29 +19,24 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     // Основные методы поиска
     Optional<Client> findByUserId(Long userId);
-    Optional<Client> findByEmail(String email);
     List<Client> findByIsPermanent(Boolean isPermanent);
-    boolean existsByEmail(String email);
     Optional<Client> findByPhone(String phone);
 
-    // Поиск по имени
     List<Client> findByLastNameContainingIgnoreCase(String lastName);
     List<Client> findByFirstNameContainingIgnoreCase(String firstName);
     List<Client> findByLastNameAndFirstName(String lastName, String firstName);
 
-    // Пагинация
     Page<Client> findAll(Pageable pageable);
     Page<Client> findByIsPermanent(Boolean isPermanent, Pageable pageable);
     Page<Client> findByLastNameContainingIgnoreCase(String lastName, Pageable pageable);
 
-    // Статистика
+
     @Query("SELECT COUNT(c) FROM Client c WHERE c.isPermanent = true")
     Long countPermanentClients();
 
     @Query("SELECT COUNT(c) FROM Client c WHERE c.createdAt >= :date")
     Long countNewClientsSince(@Param("date") Instant date);
 
-    // Исправленные сложные запросы
     @Query("""
         SELECT c FROM Client c 
         WHERE c.isPermanent = false 
@@ -82,7 +77,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
         WHERE (:lastName IS NULL OR LOWER(c.lastName) LIKE LOWER(CONCAT('%', :lastName, '%')))
         AND (:firstName IS NULL OR LOWER(c.firstName) LIKE LOWER(CONCAT('%', :firstName, '%')))
         AND (:phone IS NULL OR c.phone LIKE CONCAT('%', :phone, '%'))
-        AND (:email IS NULL OR LOWER(c.email) LIKE LOWER(CONCAT('%', :email, '%')))
         AND (:isPermanent IS NULL OR c.isPermanent = :isPermanent)
         AND (:minOrders IS NULL OR c.id IN (
             SELECT o.client.id FROM Order o GROUP BY o.client.id HAVING COUNT(o) >= :minOrders
@@ -98,7 +92,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
             @Param("lastName") String lastName,
             @Param("firstName") String firstName,
             @Param("phone") String phone,
-            @Param("email") String email,
             @Param("isPermanent") Boolean isPermanent,
             @Param("minOrders") Integer minOrders,
             @Param("sortBy") String sortBy,
@@ -106,18 +99,17 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     );
 
     @Query("""
-        SELECT c, 
-               COUNT(o) as totalOrders,
-               SUM(o.finalAmount) as totalSpent,
-               MAX(o.orderDatetime) as lastOrderDate
-        FROM Client c 
-        LEFT JOIN c.orders o 
-        WHERE o.orderDatetime BETWEEN :startDate AND :endDate
-        OR o.orderDatetime IS NULL
-        GROUP BY c 
-        HAVING totalOrders >= :minOrders OR :minOrders IS NULL
-        ORDER BY totalSpent DESC NULLS LAST
-        """)
+    SELECT c,
+       COUNT(o) as totalOrders,
+       SUM(o.finalAmount) as totalSpent,
+       MAX(o.orderDatetime) as lastOrderDate
+    FROM Client c
+    LEFT JOIN c.orders o
+    WHERE (o.orderDatetime BETWEEN :startDate AND :endDate) OR o IS NULL
+    GROUP BY c.id, c.firstName, c.lastName, c.patronymic, c.phone, c.isPermanent, c.createdAt, c.updatedAt, c.user
+    HAVING (COUNT(o) >= :minOrders OR :minOrders IS NULL)
+    ORDER BY SUM(o.finalAmount) DESC NULLS LAST
+    """)
     List<Object[]> getClientStatistics(
             @Param("startDate") Instant startDate,
             @Param("endDate") Instant endDate,

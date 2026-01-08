@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/jewelry_workshop
-    username: workshop_admin
-    password: ${DB_PASSWORD}
+    username: postgres
+    password: 197326
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -16,7 +16,7 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
-        dialect: PostgreSQLDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         jdbc:
           batch_size: 20
@@ -47,3 +47,10 @@ springdoc:
     path: /swagger-ui.html
     operations-sorter: method
     tags-sorter: alpha
+
+app:
+  jwt:
+    secret: 3cfa76ef14937c1c0e821b1c1526e7d5e7a9f3d4e2b8a1c7d6e9f0a3b5c8d2e1
+    expiration: 900000      # 15 минут
+    refresh:
+      expiration: 604800000 # 7 дней

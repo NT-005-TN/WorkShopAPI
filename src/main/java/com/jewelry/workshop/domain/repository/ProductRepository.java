@@ -135,15 +135,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             Pageable pageable
     );
 
-    @Query("""
-        SELECT p FROM Product p 
-        WHERE p.updatedAt >= :sinceDate
-        AND (p.inStock < :lowStockThreshold OR p.isAvailable != (p.inStock > 0))
-        """)
-    List<Product> findProductsNeedingAttention(
-            @Param("sinceDate") Instant sinceDate,
-            @Param("lowStockThreshold") Integer lowStockThreshold
-    );
+    @Query("SELECT p FROM Product p " +
+            "WHERE p.updatedAt >= :sinceDate " +
+            "AND (" +
+            "    (p.inStock < :lowStockThreshold) " +
+            "    OR (p.isAvailable = true AND p.inStock <= 0) " +
+            "    OR (p.isAvailable = false AND p.inStock > 0)" +
+            ")")
+    List<Product> findProductsNeedingAttention(@Param("sinceDate") Instant sinceDate,
+                                               @Param("lowStockThreshold") Integer lowStockThreshold);
 
     // Прогнозирование продаж
     @Query("""

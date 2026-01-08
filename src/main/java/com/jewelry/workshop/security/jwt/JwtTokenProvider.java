@@ -34,13 +34,32 @@ public class JwtTokenProvider {
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + jwtExpiration))
-                .signWith(key(), SignatureAlgorithm.ES512)
+                .signWith(key(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
     public String generateRefreshToken(Authentication authentication){
-       //TODO()
+       UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+        return Jwts.builder()
+                .setSubject(userPrincipal.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(new Date().getTime() + refreshExpiration))
+                .signWith(key(), SignatureAlgorithm.HS512)
+                .compact();
     }
 
+    public String getUsernameFromJwt(String token){
+        return Jwts.parser().setSigningKey(key()).build()
+                .parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public boolean validateToken(String token){
+        try{
+            Jwts.parser().setSigningKey(key()).build().parseClaimsJws(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e){
+            return false;
+        }
+    }
 
 }

@@ -178,11 +178,6 @@ CREATE TRIGGER trg_products_update_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER trg_products_check_availability
-    BEFORE INSERT OR UPDATE ON products
-                         FOR EACH ROW
-                         EXECUTE FUNCTION check_product_availability();
-
 -- Дополнительная функция для продуктов
 CREATE OR REPLACE FUNCTION check_product_availability()
 RETURNS TRIGGER AS $$
@@ -243,3 +238,9 @@ CREATE TRIGGER trg_product_materials_update_updated_at
     BEFORE UPDATE ON product_materials
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER trg_products_check_availability
+    BEFORE INSERT OR UPDATE ON products
+                         FOR EACH ROW
+                         EXECUTE FUNCTION check_product_availability();
+

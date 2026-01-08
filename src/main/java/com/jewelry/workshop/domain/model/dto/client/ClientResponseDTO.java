@@ -3,11 +3,14 @@ package com.jewelry.workshop.domain.model.dto.client;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder(builderMethodName = "builder", access = AccessLevel.PUBLIC)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "DTO для ответа с информацией о клиенте")
 public class ClientResponseDTO {

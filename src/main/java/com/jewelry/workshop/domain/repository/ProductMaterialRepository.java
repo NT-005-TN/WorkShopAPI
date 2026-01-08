@@ -39,7 +39,7 @@ public interface ProductMaterialRepository extends JpaRepository<ProductMaterial
 
     @Query("""
             SELECT pm.material, SUM(pm.quantity) as totalQuantity
-            FROM ProductMaterail pm
+            FROM ProductMaterial pm
             WHERE pm.product.id = :productId
             GROUP BY pm.material
         """)
@@ -70,21 +70,4 @@ public interface ProductMaterialRepository extends JpaRepository<ProductMaterial
            """)
     List<Product> findProductUsingMaterials(@Param("materialIds") List<Long> materialIds);
 
-    @Query("""
-            SELECT SUM(pm.quantity * m.price)
-            FROM ProductMaterial pm
-            JOIN pm.material m
-            WHERE pm.product.id = :productId
-            """)
-    BigDecimal calculateMaterialCostForProduct(@Param("productId") Long productId);
-
-    @Query("""
-            SELECT pm.material
-            FROM ProductMaterial pm
-            WHERE pm.product.id = :productId
-            AND pm.quantity > (
-                    SELECT m.inStock FROM Material m WHERE pm.material.id = m.id
-                        )
-            """)
-    List<Material> findInsufficientMaterialsForProduct(@Param("productId") Long productId);
 }

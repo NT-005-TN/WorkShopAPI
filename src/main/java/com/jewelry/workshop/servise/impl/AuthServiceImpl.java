@@ -8,22 +8,23 @@ import com.jewelry.workshop.domain.model.entity.Client;
 import com.jewelry.workshop.domain.model.entity.User;
 import com.jewelry.workshop.domain.repository.ClientRepository;
 import com.jewelry.workshop.domain.repository.UserRepository;
+import com.jewelry.workshop.infrastructure.email.EmailService; // ← ИСПРАВЛЕНО
 import com.jewelry.workshop.security.auth.UserDetailsImpl;
 import com.jewelry.workshop.security.jwt.JwtTokenProvider;
 import com.jewelry.workshop.servise.interfaces.AuthService;
 import com.jewelry.workshop.util.Constants;
 import com.jewelry.workshop.util.PasswordUtil;
-import io.swagger.v3.oas.annotations.servers.Server;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordUtil passwordUtil;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -51,7 +53,10 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPasswordHash(passwordUtil.encode(request.getPassword()));
         user.setRole(User.Role.valueOf(Constants.ROLE_CLIENT));
-        user.setEnabled(true);
+        user.setEnabled(false); // ← Не активен
+        user.setEmailVerified(false); // ← Email не подтверждён
+        user.setVerificationToken(UUID.randomUUID().toString()); // ← Токен
+        user.setVerificationTokenExpiresAt(Instant.now().plus(24, ChronoUnit.HOURS)); // ← Срок действия
         user.setCreatedAt(Instant.now());
         user.setUpdatedAt(Instant.now());
 
@@ -68,25 +73,10 @@ public class AuthServiceImpl implements AuthService {
 
         clientRepository.save(client);
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String accessToken = jwtTokenProvider.generateToken(authentication);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
-
-        AuthUserDTO authUser = new AuthUserDTO();
-        authUser.setId(savedUser.getId());
-        authUser.setEmail(savedUser.getEmail());
-        authUser.setRole(savedUser.getRole().name());
-        authUser.setFullName(client.getFullName());
+        emailService.sendVerificationEmail(user.getEmail(), user.getVerificationToken());
 
         return AuthResponseDTO.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .expiresIn(Constants.ACCESS_TOKEN_EXPIRE/1000)
-                .user(authUser)
+                .message("Регистрация успешна. Проверьте ваш email для подтверждения.")
                 .build();
     }
 
@@ -100,13 +90,18 @@ public class AuthServiceImpl implements AuthService {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User user = userRepository.findByEmail(userDetails.getEmail()).orElseThrow();
 
+        // Проверяем, подтверждён ли email
+        if (!user.isEmailVerified()) {
+            throw new RuntimeException("Email не подтверждён. Проверьте вашу почту.");
+        }
+
         String accessToken = jwtTokenProvider.generateToken(authentication);
         String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
 
         String fullName = user.getUsername();
         if(user.getRole() == User.Role.CLIENT){
             Client client = clientRepository.findByUserId(user.getId()).orElseThrow();
-            fullName = client.getFullName();;
+            fullName = client.getFullName();
         }
 
         AuthUserDTO authUser = new AuthUserDTO();
@@ -121,7 +116,27 @@ public class AuthServiceImpl implements AuthService {
                 .expiresIn(Constants.ACCESS_TOKEN_EXPIRE/1000)
                 .user(authUser)
                 .build();
+    }
 
+    @Override
+    @Transactional
+    public boolean verifyEmail(String token) {
+        User user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new RuntimeException("Неверный токен"));
+
+        if (user.getVerificationTokenExpiresAt().isBefore(Instant.now())) {
+            throw new RuntimeException("Токен истёк");
+        }
+
+        user.setEmailVerified(true);
+        user.setEnabled(true);
+        user.setVerificationToken(null);
+        user.setVerificationTokenExpiresAt(null);
+        userRepository.save(user);
+
+        emailService.sendWelcomeEmail(user.getEmail());
+
+        return true;
     }
 
     private String generateUniqueUsername(String firstName, String lastName){
@@ -132,5 +147,55 @@ public class AuthServiceImpl implements AuthService {
             username = base + counter++;
         }
         return username;
+    }
+
+    @Override
+    public void initiatePasswordReset(String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь с таким email не найден"));
+
+        String token = UUID.randomUUID().toString();
+        user.setPasswordResetToken(token);
+        user.setPasswordResetTokenExpiresAt(Instant.now().plus(1, ChronoUnit.HOURS));
+
+        userRepository.save(user);
+
+        emailService.sendPasswordResetEmail(user.getEmail(), token);
+    }
+
+    @Override
+    @Transactional
+    public boolean resetPassword(String token, String newPassword){
+        User user = userRepository.findByPasswordResetToken(token)
+                .orElseThrow(() -> new RuntimeException("Неверный или истёкший токен"));
+
+        if(user.getPasswordResetTokenExpiresAt().isBefore(Instant.now())) {
+            throw new RuntimeException("Токен истёк");
+        }
+
+        user.setPasswordHash(passwordUtil.encode(newPassword));
+
+
+        user.setPasswordResetToken(null);
+        user.setPasswordResetTokenExpiresAt(null);
+
+        userRepository.save(user);
+
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public void logout(String refreshToken){
+        if(!jwtTokenProvider.validateToken(refreshToken)){
+            throw new RuntimeException("Неверный refresh токен");
+        }
+
+        String username = jwtTokenProvider.getUsernameFromJwt(refreshToken);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        user.setRefreshTokenHash(null);
+        userRepository.save(user);
     }
 }

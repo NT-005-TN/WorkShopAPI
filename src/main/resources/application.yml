@@ -28,6 +28,27 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ntrukhina005@gmail.com
+    password: ydsyryfckcajfrwk  # <-- Не пароль от почты, а специальный "App Password"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  redis:
+    host: localhost
+    port: 6379
+    # password: your-redis-password (если есть)
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
 server:
   port: 8080
   servlet:
@@ -38,7 +59,7 @@ logging:
     com.jewelry.workshop: DEBUG
     org.springframework.web: INFO
     org.hibernate.SQL: WARN
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Исправлено опечатку
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 springdoc:
   api-docs:
@@ -50,7 +71,7 @@ springdoc:
 
 app:
   jwt:
-    secret: 3cfa76ef14937c1c0e821b1c1526e7d5e7a9f3d4e2b8a1c7d6e9f0a3b5c8d2e1
+    secret: LCiw+ElTEH1oiQYUPm+1qkvCaCbP6Lpe1eLsKh8Lpgi02gcvWlRpI5OxULIVIVwlp0+615OtoNimgmzp83cWew==
     expiration: 900000      # 15 минут
     refresh:
       expiration: 604800000 # 7 дней

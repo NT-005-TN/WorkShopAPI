@@ -53,7 +53,7 @@ public class Client {
     private Set<Order> orders = new HashSet<>();
 
     public String getFullName(){
-        return String.format("%s %s", lastName, firstName) + (patronymic == null || patronymic.isEmpty() ? "": patronymic);
+        return String.format("%s %s", lastName, firstName) + (patronymic == null || patronymic.isEmpty() ? "": " " + patronymic);
     }
 
     public boolean isPermanentClient(){

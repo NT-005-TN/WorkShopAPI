@@ -1,3 +1,0 @@
-
-ALTER TABLE audit_log
-ALTER COLUMN user_id TYPE BIGINT USING user_id::BIGINT;

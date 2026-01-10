@@ -31,7 +31,7 @@ public class JwtTokenProvider {
     public String generateToken(Authentication authentication){
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
         return Jwts.builder()
-                .setSubject(userPrincipal.getUsername())
+                .setSubject(userPrincipal.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + jwtExpiration))
                 .signWith(key(), SignatureAlgorithm.HS512)
@@ -41,7 +41,7 @@ public class JwtTokenProvider {
     public String generateRefreshToken(Authentication authentication){
        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
         return Jwts.builder()
-                .setSubject(userPrincipal.getUsername())
+                .setSubject(userPrincipal.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + refreshExpiration))
                 .signWith(key(), SignatureAlgorithm.HS512)

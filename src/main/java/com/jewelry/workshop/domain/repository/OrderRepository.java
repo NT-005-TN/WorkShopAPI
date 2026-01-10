@@ -35,6 +35,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByCompletedAtBetween(Instant start, Instant end);
     List<Order> findByCompletedAtAfter(Instant date);
 
+    Long countByClientId(Long clientId);
+
     @Query("""
         SELECT DATE(CAST(o.orderDatetime AS date)) as orderDate, 
                COUNT(o) as orderCount,
@@ -92,13 +94,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("endDate") Instant endDate
     );
 
-    @Query("""
-        SELECT o FROM Order o 
-        WHERE o.client.isPermanent = true 
-        AND o.orderDatetime >= :startDate
-        ORDER BY o.finalAmount DESC
-        """)
-    List<Order> findPermanentClientOrders(@Param("startDate") Instant startDate, Pageable pageable);
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.client.id = :clientId")
+    Long countOrdersByClientId(@Param("clientId") Long clientId);
+
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.client.id = :clientId")
+    BigDecimal getTotalSpentByClientId(@Param("clientId") Long clientId);
+
+    @Query("SELECT MAX(o.orderDatetime) FROM Order o WHERE o.client.id = :clientId")
+    LocalDateTime getLastOrderDateByClientId(@Param("clientId") Long clientId);
 
     @Query("""
         SELECT EXTRACT(MONTH FROM o.orderDatetime) as month,
@@ -114,6 +117,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("startDate") Instant startDate,
             @Param("endDate") Instant endDate
     );
+
 
     @Query("""
         SELECT o FROM Order o 
@@ -152,4 +156,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         ORDER BY o.updatedAt DESC
         """)
     List<Order> findRecentlyUpdatedOrders(@Param("sinceDate") Instant sinceDate);
+
 }

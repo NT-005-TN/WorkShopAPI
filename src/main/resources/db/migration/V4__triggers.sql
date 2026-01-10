@@ -120,24 +120,23 @@ RETURN NEW;
 END;
 $$ language 'plpgsql';
 
--- Функция для проверки ролей пользователей
 CREATE OR REPLACE FUNCTION check_user_role_consistency()
-RETURNS TRIGGER AS $$
+    RETURNS TRIGGER AS $$
 BEGIN
     -- Если пользователь добавлен в clients, проверяем что его роль CLIENT
-    IF EXISTS (SELECT 1 FROM clients WHERE user_id = NEW.user_id) AND NEW.role != 'CLIENT' THEN
-        RAISE EXCEPTION 'Пользователь с ID % находится в таблице clients, но его роль не CLIENT', NEW.user_id;
-END IF;
+    IF EXISTS (SELECT 1 FROM clients WHERE user_id = NEW.id) AND NEW.role != 'CLIENT' THEN
+        RAISE EXCEPTION 'Пользователь с ID % находится в таблице clients, но его роль не CLIENT', NEW.id;
+    END IF;
 
     -- Если пользователь добавлен в employees, проверяем что его роль SELLER или ADMIN
-    IF EXISTS (SELECT 1 FROM employees WHERE user_id = NEW.user_id)
-       AND NEW.role NOT IN ('SELLER', 'ADMIN') THEN
-        RAISE EXCEPTION 'Пользователь с ID % находится в таблице employees, но его роль не SELLER или ADMIN', NEW.user_id;
-END IF;
+    IF EXISTS (SELECT 1 FROM employees WHERE user_id = NEW.id)
+        AND NEW.role NOT IN ('SELLER', 'ADMIN') THEN
+        RAISE EXCEPTION 'Пользователь с ID % находится в таблице employees, но его роль не SELLER или ADMIN', NEW.id;
+    END IF;
 
-RETURN NEW;
+    RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE 'plpgsql';
 
 -- ТРИГГЕРЫ для таблицы users (более 5 полей → 2 триггера)
 CREATE TRIGGER trg_users_update_updated_at

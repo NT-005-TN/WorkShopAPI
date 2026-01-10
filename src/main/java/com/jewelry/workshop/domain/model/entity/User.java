@@ -7,15 +7,13 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.Instant;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
-@ToString()
+@ToString
 public class User {
 
     @Id
@@ -32,10 +30,29 @@ public class User {
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
     private Role role;
 
     @Column(name = "enabled", nullable = false)
     private Boolean enabled = false;
+
+    @Column(name = "email_verified", nullable = false)
+    private Boolean emailVerified = false;
+
+    @Column(name = "verification_token", length = 255)
+    private String verificationToken;
+
+    @Column(name = "verification_token_expires_at")
+    private Instant verificationTokenExpiresAt;
+
+    @Column(name = "password_reset_token", length = 255)
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_token_expires_at")
+    private Instant passwordResetTokenExpiresAt;
+
+    @Column(name = "refresh_token_hash", length = 256)
+    private String refreshTokenHash;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -45,25 +62,31 @@ public class User {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(enabled);
+    }
+
     public enum Role {
         ADMIN, CLIENT, SELLER
     }
 
-    public boolean hasRole(Role requiredRole){
+    public boolean hasRole(Role requiredRole) {
         return this.role == requiredRole;
     }
 
-    public boolean isAdmin(){
+    public boolean isAdmin() {
         return Role.ADMIN.equals(this.role);
     }
 
-    public boolean isSeller(){
+    public boolean isSeller() {
         return Role.SELLER.equals(this.role);
     }
 
-    public boolean isClient(){
+    public boolean isClient() {
         return Role.CLIENT.equals(this.role);
     }
 
-
+    public boolean isEmailVerified(){
+        return Boolean.TRUE.equals(emailVerified);
+    }
 }

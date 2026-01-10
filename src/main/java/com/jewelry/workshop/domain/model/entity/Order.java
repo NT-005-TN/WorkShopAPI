@@ -98,7 +98,7 @@ public class Order {
         this.status = newStatus;
 
         if(STATUS_COMPLETED.equals(newStatus) || STATUS_DELIVERED.equals(newStatus))
-            this.orderDatetime = Instant.now();
+            this.completedAt = Instant.now();
     }
 
     public boolean canBeCancelled() {

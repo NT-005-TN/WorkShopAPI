@@ -2,12 +2,14 @@ package com.jewelry.workshop.domain.model.dto.client;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "DTO для профиля клиента (упрощенный для /me endpoint)")
 public class ClientProfileDTO {
@@ -28,7 +30,7 @@ public class ClientProfileDTO {
     private String phone;
 
     @Schema(description = "Является ли клиент постоянным", example = "false")
-    private Boolean isPermanent;
+    private Boolean isPermanent = Boolean.FALSE;
 
     @Schema(description = "Полное имя клиента", example = "Петров Иван Сергеевич")
     private String fullName;

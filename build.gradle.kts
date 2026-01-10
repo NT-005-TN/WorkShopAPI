@@ -35,12 +35,30 @@ dependencies {
 
     // Spring Security
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-web")
 
     // Для создания и проверки JWT токенов
     implementation("io.jsonwebtoken:jjwt-api:0.12.3")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.3")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.3")
+
+    //email
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+
+    // Jakarta Validation (для @Valid, @NotBlank и т.д.)
+    implementation("jakarta.validation:jakarta.validation-api:3.0.2")
+    // Jakarta Persistence (JPA)
+    implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
+    // Jakarta Transaction (JTA)
+    implementation("jakarta.transaction:jakarta.transaction-api:2.0.1")
+    // Jakarta Servlet API (если нужен для web-слоя)
+    compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    // Jakarta Annotation API
+    compileOnly("jakarta.annotation:jakarta.annotation-api:2.1.1")
+    // Jakarta Mail (если используете более новую реализацию)
+    implementation("com.sun.mail:jakarta.mail:2.0.1")
+
+    // Redis
+    implementation("org.springframework.boot:spring-boot-starter-data-redis");
 }
 
 tasks.test {

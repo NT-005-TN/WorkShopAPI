@@ -6,8 +6,8 @@ services:
     container_name: jewelry-workshop-db
     environment:
       POSTGRES_DB: jewelry_workshop
-      POSTGRES_USER: workshop_admin
-      POSTGRES_PASSWORD: workshop_password_123
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 197326
     ports:
       - "5432:5432"
     volumes:

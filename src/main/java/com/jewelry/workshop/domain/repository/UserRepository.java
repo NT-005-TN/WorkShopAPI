@@ -25,8 +25,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     //Поиск по ролям
     List<User> findByRole(User.Role role);
+    Optional<User> findByVerificationToken(String verificationToken);
     Page<User> findByRole(User.Role role, Pageable pageable);
     List<User> findByRoleAndEnabled(User.Role role, Boolean enabled);
+    Optional<User> findByPasswordResetToken(String passwordResetToken);
 
     //Поиск по статусу активности
     List<User> findByEnabled(Boolean enabled);

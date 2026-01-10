@@ -9,21 +9,21 @@ import lombok.Data;
 @Data
 @Builder(builderMethodName = "builder", access = AccessLevel.PUBLIC)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "DTO для ответа аутентификации")
+@Schema(description = "Ответ на аутентификацию (токены или сообщение)")
 public class AuthResponseDTO {
 
-    @Schema(description = "Тип токена", example = "Bearer")
-    private String tokenType = "Bearer";
-
-    @Schema(description = "Access токен")
+    @Schema(description = "Токен доступа (access_token)")
     private String accessToken;
 
-    @Schema(description = "Refresh токен")
+    @Schema(description = "Токен обновления (refresh_token)")
     private String refreshToken;
 
-    @Schema(description = "Время жизни токена в секундах", example = "3600")
+    @Schema(description = "Время жизни токена в секундах")
     private Long expiresIn;
 
     @Schema(description = "Информация о пользователе")
     private AuthUserDTO user;
+
+    @Schema(description = "Сообщение (например, при регистрации)")
+    private String message;
 }

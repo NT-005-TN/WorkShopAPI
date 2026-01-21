@@ -8,28 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
 
-    // Основные методы поиска
     Optional<Client> findByUserId(Long userId);
-    List<Client> findByIsPermanent(Boolean isPermanent);
     Optional<Client> findByPhone(String phone);
 
-    List<Client> findByLastNameContainingIgnoreCase(String lastName);
-    List<Client> findByFirstNameContainingIgnoreCase(String firstName);
-    List<Client> findByLastNameAndFirstName(String lastName, String firstName);
-
-    Page<Client> findAll(Pageable pageable);
-    Page<Client> findByIsPermanent(Boolean isPermanent, Pageable pageable);
-    Page<Client> findByLastNameContainingIgnoreCase(String lastName, Pageable pageable);
-
+    void deleteByUserId(Long userId);
 
     @Query("SELECT COUNT(c) FROM Client c WHERE c.isPermanent = true")
     Long countPermanentClients();
@@ -38,60 +27,28 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Long countNewClientsSince(@Param("date") Instant date);
 
     @Query("""
-        SELECT c FROM Client c 
-        WHERE c.isPermanent = false 
-        AND c.id IN (
-            SELECT o.client.id FROM Order o 
-            GROUP BY o.client.id 
-            HAVING COUNT(o) >= :minOrders
-        )
-        """)
-    List<Client> findClientsEligibleForPermanent(@Param("minOrders") Integer minOrders);
-
-    @Query("""
-        SELECT c FROM Client c 
-        WHERE c.id IN (
-            SELECT o.client.id FROM Order o 
-            GROUP BY o.client.id 
-            HAVING SUM(o.finalAmount) > (
-                SELECT AVG(o2.finalAmount) FROM Order o2
-            )
-        )
-        """)
-    List<Client> findClientsWithAboveAverageSpending();
-
-    @Query("""
-        SELECT DISTINCT c FROM Client c 
-        JOIN c.orders o 
-        WHERE o.orderDatetime BETWEEN :startDate AND :endDate
-        ORDER BY o.orderDatetime DESC
-        """)
-    List<Client> findClientsWithOrdersBetween(
-            @Param("startDate") Instant startDate,
-            @Param("endDate") Instant endDate
-    );
-
-    // Новые методы по ТЗ
-    @Query("""
-        SELECT c FROM Client c 
-        WHERE (:lastName IS NULL OR LOWER(c.lastName) LIKE LOWER(CONCAT('%', :lastName, '%')))
-        AND (:firstName IS NULL OR LOWER(c.firstName) LIKE LOWER(CONCAT('%', :firstName, '%')))
-        AND (:phone IS NULL OR c.phone LIKE CONCAT('%', :phone, '%'))
-        AND (:isPermanent IS NULL OR c.isPermanent = :isPermanent)
-        AND (:minOrders IS NULL OR c.id IN (
-            SELECT o.client.id FROM Order o GROUP BY o.client.id HAVING COUNT(o) >= :minOrders
-        ))
-        ORDER BY 
-            CASE WHEN :sortBy = 'name' THEN c.lastName END ASC,
-            CASE WHEN :sortBy = 'created' THEN c.createdAt END DESC,
-            CASE WHEN :sortBy = 'orders' THEN (
-                SELECT COUNT(o) FROM Order o WHERE o.client.id = c.id
-            ) END DESC
-        """)
+    SELECT c FROM Client c
+    WHERE
+    (:lastName IS NULL OR FUNCTION('LOWER', CAST(c.lastName AS text)) LIKE LOWER(CONCAT('%', CAST(:lastName AS text), '%')))
+    AND (:firstName IS NULL OR FUNCTION('LOWER', CAST(c.firstName AS text)) LIKE LOWER(CONCAT('%', CAST(:firstName AS text), '%')))
+    AND (:phonePattern IS NULL OR c.phone LIKE :phonePattern)
+    AND (:isPermanent IS NULL OR c.isPermanent = :isPermanent)
+    AND (:minOrders IS NULL OR c.id IN (
+        SELECT o.client.id FROM Order o
+        GROUP BY o.client.id
+        HAVING COUNT(o) >= :minOrders
+    ))
+    ORDER BY
+    CASE WHEN :sortBy = 'name' THEN c.lastName END,
+    CASE WHEN :sortBy = 'created' THEN c.createdAt END DESC,
+    CASE WHEN :sortBy = 'orders' THEN (
+        SELECT COUNT(o2) FROM Order o2 WHERE o2.client.id = c.id
+    ) END DESC
+    """)
     Page<Client> findClientsByCriteria(
             @Param("lastName") String lastName,
             @Param("firstName") String firstName,
-            @Param("phone") String phone,
+            @Param("phonePattern") String phonePattern,
             @Param("isPermanent") Boolean isPermanent,
             @Param("minOrders") Integer minOrders,
             @Param("sortBy") String sortBy,
@@ -117,16 +74,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     );
 
     @Query("""
-        SELECT c FROM Client c 
-        WHERE c.id NOT IN (
-            SELECT DISTINCT o.client.id FROM Order o 
-            WHERE o.orderDatetime >= :date
-        )
-        AND c.createdAt < :date
-        """)
-    List<Client> findInactiveClients(@Param("date") Instant date);
-
-    @Query("""
         SELECT c, 
                (SELECT COUNT(o) FROM Order o WHERE o.client.id = c.id AND o.status = 'COMPLETED') as completedOrders,
                (SELECT SUM(o.finalAmount) FROM Order o WHERE o.client.id = c.id) as lifetimeValue,
@@ -136,47 +83,4 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
         ORDER BY lifetimeValue DESC
         """)
     List<Object[]> getPermanentClientDetails(Pageable pageable);
-
-    @Query("""
-        SELECT EXTRACT(MONTH FROM c.createdAt) as month,
-               EXTRACT(YEAR FROM c.createdAt) as year,
-               COUNT(c) as newClients,
-               SUM(CASE WHEN c.isPermanent = true THEN 1 ELSE 0 END) as newPermanentClients
-        FROM Client c 
-        WHERE c.createdAt BETWEEN :startDate AND :endDate
-        GROUP BY EXTRACT(YEAR FROM c.createdAt), EXTRACT(MONTH FROM c.createdAt)
-        ORDER BY year DESC, month DESC
-        """)
-    List<Object[]> getClientAcquisitionReport(
-            @Param("startDate") Instant startDate,
-            @Param("endDate") Instant endDate
-    );
-
-    // Поиск клиентов для маркетинговых кампаний
-    @Query("""
-        SELECT c FROM Client c 
-        WHERE c.isPermanent = false 
-        AND c.createdAt >= :startDate 
-        AND c.id IN (
-            SELECT o.client.id FROM Order o 
-            WHERE o.orderDatetime BETWEEN :startDate AND :endDate
-            GROUP BY o.client.id 
-            HAVING SUM(o.finalAmount) BETWEEN :minAmount AND :maxAmount
-        )
-        """)
-    List<Client> findPotentialPermanentClients(
-            @Param("startDate") Instant startDate,
-            @Param("endDate") Instant endDate,
-            @Param("minAmount") BigDecimal minAmount,
-            @Param("maxAmount") BigDecimal maxAmount
-    );
-
-    // Поиск клиентов с просроченными заказами
-    @Query("""
-        SELECT DISTINCT c FROM Client c 
-        JOIN c.orders o 
-        WHERE o.status NOT IN ('COMPLETED', 'CANCELLED', 'DELIVERED')
-        AND o.orderDatetime < :date
-        """)
-    List<Client> findClientsWithOverdueOrders(@Param("date") Instant date);
 }

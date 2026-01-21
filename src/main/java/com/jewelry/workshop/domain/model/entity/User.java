@@ -51,9 +51,6 @@ public class User {
     @Column(name = "password_reset_token_expires_at")
     private Instant passwordResetTokenExpiresAt;
 
-    @Column(name = "refresh_token_hash", length = 256)
-    private String refreshTokenHash;
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
@@ -70,23 +67,32 @@ public class User {
         ADMIN, CLIENT, SELLER
     }
 
+    public String getUserRole(){
+        return this.role.toString();
+    }
+
     public boolean hasRole(Role requiredRole) {
+
         return this.role == requiredRole;
     }
 
     public boolean isAdmin() {
+
         return Role.ADMIN.equals(this.role);
     }
 
     public boolean isSeller() {
+
         return Role.SELLER.equals(this.role);
     }
 
     public boolean isClient() {
+
         return Role.CLIENT.equals(this.role);
     }
 
     public boolean isEmailVerified(){
+
         return Boolean.TRUE.equals(emailVerified);
     }
 }

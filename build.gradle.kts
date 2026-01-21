@@ -59,6 +59,11 @@ dependencies {
 
     // Redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis");
+
+    //OpenCSV
+    implementation("com.opencsv:opencsv:5.7.1")
+
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
 
 tasks.test {

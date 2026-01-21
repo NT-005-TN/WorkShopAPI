@@ -5,10 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-@Schema(description = "DTO для запроса обновления токена")
+@Schema(description = "DTO для запроса обновления access-токена")
 public class RefreshTokenRequestDTO {
 
     @NotBlank(message = "Refresh токен обязателен")
-    @Schema(description = "Refresh токен", required = true)
+    @Schema(
+            description = "Токен обновления (refresh_token), полученный при входе в систему",
+            example = "eyJhbGciOiJIUzUxMiJ9.xxxxx",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
     private String refreshToken;
 }

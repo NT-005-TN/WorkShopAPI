@@ -16,7 +16,7 @@ import java.util.Set;
 @Table(name = "materials")
 @Getter
 @Setter
-@ToString(exclude = "products")
+@ToString
 public class Material {
 
     @Id

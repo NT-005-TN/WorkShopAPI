@@ -13,10 +13,6 @@ import java.util.List;
 @Schema(description = "DTO для создания заказа")
 public class OrderCreateDTO {
 
-    @NotNull(message = "ID клиента обязателен")
-    @Schema(description = "ID клиента", example = "1", required = true)
-    private Long clientId;
-
     @NotEmpty(message = "Заказ должен содержать хотя бы один товар")
     @Schema(description = "Список товаров в заказе", required = true)
     private List<@Valid OrderItemCreateDTO> items;

@@ -74,19 +74,14 @@ public class Order {
         this.orderDatetime = Instant.now();
     }
 
-    public void calculateTotals(){
-        if (client == null)
-            throw new IllegalStateException("Заказ должен иметь клиента");
-
-        if(client.isPermanentClient())
-            discountAmount = totalAmount.multiply(new BigDecimal("0.10"));
-        else
-            discountAmount = BigDecimal.ZERO;
-
-        finalAmount = totalAmount.subtract(discountAmount);
-
-        if(finalAmount.compareTo(BigDecimal.ZERO) < 0)
-            finalAmount = BigDecimal.ZERO;
+    public void calculateTotals() {
+        if (this.discountAmount == null) {
+            this.discountAmount = BigDecimal.ZERO;
+        }
+        this.finalAmount = this.totalAmount.subtract(this.discountAmount);
+        if (this.finalAmount.compareTo(BigDecimal.ZERO) < 0) {
+            this.finalAmount = BigDecimal.ZERO;
+        }
     }
 
     public void updateStatus(String newStatus){
@@ -113,16 +108,6 @@ public class Order {
                     )
             );
         updateStatus(STATUS_CANCELLED);
-    }
-
-    private boolean isValidStatus(String status){
-        return status != null && (
-                STATUS_PENDING.equals(status) ||
-                        STATUS_PROCESSING.equals(status) ||
-                        STATUS_COMPLETED.equals(status) ||
-                        STATUS_CANCELLED.equals(status) ||
-                        STATUS_DELIVERED.equals(status)
-        );
     }
 
     public String getOrderInfo(){
@@ -152,5 +137,15 @@ public class Order {
             totalAmount = totalAmount.add(item.getTotalPrice());
         }
         calculateTotals();
+    }
+
+    public static boolean isValidStatus(String status) {
+        return status != null && (
+                STATUS_PENDING.equals(status) ||
+                        STATUS_PROCESSING.equals(status) ||
+                        STATUS_COMPLETED.equals(status) ||
+                        STATUS_CANCELLED.equals(status) ||
+                        STATUS_DELIVERED.equals(status)
+        );
     }
 }

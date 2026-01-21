@@ -4,11 +4,13 @@ import com.jewelry.workshop.security.auth.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.Duration;
 import java.util.Date;
 
 
@@ -21,6 +23,7 @@ public class JwtTokenProvider {
     @Value("${app.jwt.expiration}")
     private long jwtExpiration;
 
+    @Getter
     @Value("${app.jwt.refresh.expiration}")
     private long refreshExpiration;
 
@@ -48,7 +51,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String getUsernameFromJwt(String token){
+    public String getEmailFromJwt(String token){
         return Jwts.parser().setSigningKey(key()).build()
                 .parseClaimsJws(token).getBody().getSubject();
     }

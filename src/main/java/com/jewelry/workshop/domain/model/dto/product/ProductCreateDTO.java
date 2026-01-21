@@ -35,6 +35,11 @@ public class ProductCreateDTO {
             allowableValues = {"КОЛЬЦО", "СЕРЬГИ", "БРАСЛЕТ", "КОЛЬЕ", "ПОДВЕСКА", "ЧАСЫ", "БРОШЬ", "ЗАПОНКИ"})
     private String type;
 
+    @Schema(description = "Артикул (SKU)", example = "RING-GD-001")
+    @NotBlank(message = "Артикул (SKU) обязателен и должен быть уникален")
+    @Pattern(regexp = "^[A-Z0-9\\-_]+$", message = "Артикул может содержать только заглавные буквы, цифры, дефис и подчёркивание")
+    private String sku;
+
     @NotNull(message = "Количество на складе обязательно")
     @Min(value = 0, message = "Количество не может быть отрицательным")
     @Schema(description = "Количество на складе", example = "10", required = true)

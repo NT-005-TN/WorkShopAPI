@@ -1,4 +1,3 @@
-/*
 package com.jewelry.workshop.util;
 
 import lombok.RequiredArgsConstructor;
@@ -11,12 +10,9 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class RateLimitService {
 
-    private static final int MAX_ATTEMPTS = 5;
-    private static final Duration WINDOW = Duration.ofMinutes(1);
-
     private final StringRedisTemplate redisTemplate;
 
-    public boolean isAllowed(String key) {
+    public boolean isAllowed(String key, int maxAttempts, int windowMinutes) {
         String attemptsKey = "rate_limit:" + key;
         String timeKey = "rate_limit_time:" + key;
 
@@ -28,23 +24,22 @@ public class RateLimitService {
 
         if (timeStr != null) {
             long time = Long.parseLong(timeStr);
-            if (now - time > WINDOW.toMillis()) {
+            if (now - time > Duration.ofMinutes(windowMinutes).toMillis()) {
                 redisTemplate.delete(attemptsKey);
                 redisTemplate.delete(timeKey);
                 attempts = 0;
             }
         }
 
-        if (attempts >= MAX_ATTEMPTS) {
+        if (attempts >= maxAttempts) {
             return false;
         }
 
-        redisTemplate.opsForValue().set(attemptsKey, String.valueOf(attempts + 1), WINDOW);
+        redisTemplate.opsForValue().set(attemptsKey, String.valueOf(attempts + 1), Duration.ofMinutes(windowMinutes));
         if (attempts == 0) {
-            redisTemplate.opsForValue().set(timeKey, String.valueOf(now), WINDOW);
+            redisTemplate.opsForValue().set(timeKey, String.valueOf(now), Duration.ofMinutes(windowMinutes));
         }
 
         return true;
     }
-}*/
-//TODO()
+}

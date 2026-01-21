@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.management.relation.Role;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class UserDetailsImpl implements UserDetails {
     private final String password;
     private final boolean enabled;
     private final Collection<? extends GrantedAuthority> authorities;
+    private final User user;
 
     public static UserDetailsImpl build(User user) {
         List<GrantedAuthority> authorities = List.of(
@@ -29,14 +31,19 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPasswordHash(),
-                user.isEnabled(), // ← enabled из БД
-                authorities
+                user.isEnabled(),
+                authorities,
+                user
         );
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
+    }
+
+    public String getUserRole(){
+        return user.getUserRole();
     }
 
     @Override

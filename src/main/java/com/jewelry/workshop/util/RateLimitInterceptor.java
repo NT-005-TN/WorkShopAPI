@@ -1,11 +1,12 @@
-/*
 package com.jewelry.workshop.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.HandlerMapping;
 
 @Component
 @RequiredArgsConstructor
@@ -15,10 +16,21 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String ip = getClientIpAddress(request);
-        String key = "verify_email:" + ip;
+        if(!(handler instanceof HandlerMethod)) {
+            return true;
+        }
 
-        if (!rateLimitService.isAllowed(key)) {
+        HandlerMethod handlerMethod = (HandlerMethod) handler;
+        RateLimit rateLimit = handlerMethod.getMethodAnnotation(RateLimit.class);
+
+        if(rateLimit == null) {
+            return true;
+        }
+
+        String ip = getClientIpAddress(request);
+        String key = rateLimit.keyPrefix() + ":" + ip;
+
+        if (!rateLimitService.isAllowed(key, rateLimit.maxAttempts(), rateLimit.windowMinutes())) {
             response.setStatus(429);
             response.getWriter().write("Слишком много запросов. Попробуйте позже.");
             return false;
@@ -40,5 +52,4 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
         return request.getRemoteAddr();
     }
-}*/
-//TODO()
+}

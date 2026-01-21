@@ -59,4 +59,5 @@ public class Client {
     public boolean isPermanentClient(){
         return Boolean.TRUE.equals(isPermanent);
     }
+
 }

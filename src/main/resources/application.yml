@@ -42,13 +42,17 @@ spring:
   redis:
     host: localhost
     port: 6379
-    # password: your-redis-password (если есть)
+    # password: redis-password
     timeout: 2000ms
     lettuce:
       pool:
         max-active: 8
         max-idle: 8
         min-idle: 0
+  security:
+    password:
+      min-length: 6
+      client-change-min-length: 8
 server:
   port: 8080
   servlet:

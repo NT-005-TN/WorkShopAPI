@@ -1,5 +1,7 @@
 # WorkShopAPI
 my own pet project is based on my training database, which implements APIs in Java, Spring Boot, PostgreSQL, Redis, Docker, Gradle,
+<img width="1904" height="920" alt="image" src="https://github.com/user-attachments/assets/4c1f583a-2956-4bd8-b1eb-688a568f054e" />
+
 <img width="1846" height="716" alt="image" src="https://github.com/user-attachments/assets/55ff8bb3-7db0-4ee2-9953-c6088df5bc27" />
 
 <img width="1893" height="635" alt="image" src="https://github.com/user-attachments/assets/a5162ede-b812-44bf-a364-dc13a9f72fe7" />

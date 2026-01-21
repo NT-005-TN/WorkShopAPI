@@ -12,3 +12,4 @@ my own pet project is based on my training database, which implements APIs in Ja
 
 <img width="1834" height="533" alt="image" src="https://github.com/user-attachments/assets/5877d865-ac8a-4e79-8000-400041d54af7" />
 
+<img width="1841" height="587" alt="image" src="https://github.com/user-attachments/assets/724bdaa2-29bf-4f52-8373-5f90c0fcd99d" />
